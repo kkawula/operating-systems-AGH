@@ -6,7 +6,7 @@ CFLAGS = -Wall -g
 all: countdown
 
 countdown: countdown.c
-	$(CC) $(CFLAGS) -o countdown countdown.c
+	$(CC) $(CFLAGS) countdown.c -o countdown
 
 clean:
-	rm -f countdown
+	rm -rf countdown countdown.dSYM
