@@ -1,8 +1,7 @@
-//
-// Created by Kamil on 11/03/2024.
-//
+#ifndef COLLATZ_H
+#define COLLATZ_H
 
-#ifndef SYSOPY_COLLATZ_H
-#define SYSOPY_COLLATZ_H
+int collatz_conjecture(int input);
+int test_collatz_convergence(int input, int max_iter);
 
-#endif //SYSOPY_COLLATZ_H
+#endif
