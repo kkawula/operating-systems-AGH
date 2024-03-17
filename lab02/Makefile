@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -O0
 
 .PHONY: all clean test
 
@@ -12,7 +12,7 @@ shared_client: client.c shared_lib
 	$(CC) $(CFLAGS) -o shared_client client.c -lcollatz -L ./ -Wl,-rpath,.
 
 dynamic_client: client.c shared_lib
-	$(CC) $(CFLAGS) -o dynamic_client client.c -ldl -D DYNAMIC_LIB
+	$(CC) $(CFLAGS) -o dynamic_client client.c -D DYNAMIC_LIB
 
 static_lib: collatz.c
 	$(CC) $(CFLAGS) -c collatz.c
