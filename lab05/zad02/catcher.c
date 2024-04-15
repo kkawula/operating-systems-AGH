@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 700
+
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
@@ -17,6 +19,7 @@ void handleSIGUSR1(int sig, siginfo_t *info, void *ucontext) {
     mode = info->si_value.sival_int;
     sender_pid = info->si_pid;
     counter++;
+    printf("Received signal from sender PID: %d\n", sender_pid);
 
     sendConfirmation(sender_pid);
 
@@ -29,6 +32,7 @@ void handleSIGUSR1(int sig, siginfo_t *info, void *ucontext) {
     } else if (mode == 3) {
         exit(EXIT_SUCCESS);
     } else {
+        printf("Received signal with unknown mode: mode %d\n", mode);
         printf("Unknown mode\n");
     }
 }
@@ -41,7 +45,7 @@ int main(void) {
     struct sigaction act;
     act.sa_sigaction = handleSIGUSR1;
     sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
+    act.sa_flags = SA_SIGINFO;
 
     sigaction(SIGUSR1, &act, NULL);
 

@@ -9,6 +9,7 @@ sender: sender.c
 
 catcher: catcher.c
 	$(CC) $(CFLAGS) catcher.c -o catcher
+	
 clean:
 	rm -rf sender catcher
 
