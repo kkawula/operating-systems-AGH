@@ -1,10 +1,14 @@
+#define _XOPEN_SOURCE 700
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <mqueue.h>
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <signal.h>
-#include <fcntl.h>
 
 #include "specs.h"
 
@@ -15,10 +19,13 @@ void handlesig(int signum) {
   running = false;
 }
 
+#define MIN(a, b) (a < b ? a : b)
+
+
 int main(int argc, char *argv[]) {
 
   pid_t pid = getpid();
-  char queue_name[40] = {0};
+  char queue_name[MAX_MSG_SIZE] = {0};
   sprintf(queue_name, "/client_queue_%d", pid);
 
   struct mq_attr attr = {
@@ -33,8 +40,8 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  mqd_t server_queue = mq_open(SERVER_NAME, O_RDWR | O_CREAT,  S_IRUSR | S_IWUSR);
-  if (server_queue == -1) {
+  mqd_t server_queue = mq_open(SERVER_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR, NULL);
+  if (server_queue < 0) {
     printf("Server not found\n");
     perror("mq_open server");
   }
@@ -45,9 +52,9 @@ int main(int argc, char *argv[]) {
     .id = -1
   };
 
-  memcpy(message_init.text, queue_name, strlen(queue_name));
+  memcpy(message_init.data, queue_name, MIN(strlen(queue_name), MAX_MSG_SIZE - 1));
 
-  if(mq_send(server_queue, (char*)&message_init, sizeof(message_init), 10) < 0){
+  if(mq_send(server_queue, (char*)&message_init, sizeof(message_init), 9) < 0){
     perror("mq_send init");
   }
 
@@ -60,14 +67,12 @@ int main(int argc, char *argv[]) {
   }
 
   pid_t listener_pid = fork();
-  if (listener_pid < 0)
-    perror("fork listener");
-  else if (listener_pid == 0) {
+  if (listener_pid == 0) {
     close(to_parent_pipe[0]);
     message receive_message;
 
     while(running) {
-      mq_receive(mq_client_descriptor, (char*)&receive_message, sizeof(receive_message), NULL);
+      mq_receive(client_queue, (char*)&receive_message, sizeof(receive_message), NULL);
       switch(receive_message.type) {
         case MESSAGE:
           printf("Received from id: %d message: %s\n", receive_message.id, receive_message.data);
@@ -92,19 +97,19 @@ int main(int argc, char *argv[]) {
 
     char* buffer = NULL;
     while(running) {
-      mq_getattr(server_queue, &attributes);
-      if(attributes.mq_curmsgs >= attributes.mq_maxmsg) {
+      mq_getattr(server_queue, &attr);
+      if(attr.mq_curmsgs >= attr.mq_maxmsg) {
         printf("Server is busy, please wait\n");
         continue;
       }
       
       if(scanf("%ms", &buffer) == 1) {
-        message_t send_message = {
+        message send_message = {
           .type = MESSAGE,
-          .it = identifier
+          .id = identifier
         };
-        memcpy(send_message.text, buffer, strlen(buffer));
-
+        memcpy(send_message.data, buffer, MIN(strlen(buffer), MAX_MSG_SIZE -1));
+        printf("Sending message: %s\n", send_message.data);
         mq_send(server_queue, (char*)&send_message, sizeof(send_message), 10);
 
         free(buffer);
