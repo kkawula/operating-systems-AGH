@@ -40,11 +40,11 @@ int main() {
         exit(1);
     }
 
-    sem_t *sem_full = sem_open(SEM_FULL, 0);
+    sem_t *sem_any = sem_open(SEM_ANY, 0);
     sem_t *sem_empty = sem_open(SEM_EMPTY, 0);
     sem_t *sem_mutex = sem_open(SEM_MUTEX, 0);
 
-    if (sem_full == SEM_FAILED || sem_empty == SEM_FAILED || sem_mutex == SEM_FAILED) {
+    if (sem_any == SEM_FAILED || sem_empty == SEM_FAILED || sem_mutex == SEM_FAILED) {
         perror("sem_open");
         exit(1);
     }
@@ -59,13 +59,13 @@ int main() {
     queue->count++;
 
     sem_post(sem_mutex);
-    sem_post(sem_full);
+    sem_post(sem_any);
 
     printf("Message sent: %s\n", message);
 
     munmap(queue, sizeof(SharedQueue));
     close(shm_fd);
-    sem_close(sem_full);
+    sem_close(sem_any);
     sem_close(sem_empty);
     sem_close(sem_mutex);
 

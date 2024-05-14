@@ -39,18 +39,18 @@ int main() {
     queue->tail = 0;
     queue->count = 0;
 
-    sem_t *sem_full = sem_open(SEM_FULL, O_CREAT, 0666, 0);
+    sem_t *sem_any = sem_open(SEM_ANY, O_CREAT, 0666, 0);
     sem_t *sem_empty = sem_open(SEM_EMPTY, O_CREAT, 0666, QUEUE_SIZE);
     sem_t *sem_mutex = sem_open(SEM_MUTEX, O_CREAT, 0666, 1);
 
-    if (sem_full == SEM_FAILED || sem_empty == SEM_FAILED || sem_mutex == SEM_FAILED) {
+    if (sem_any == SEM_FAILED || sem_empty == SEM_FAILED || sem_mutex == SEM_FAILED) {
         perror("sem_open");
         exit(1);
     }
 
     munmap(queue, sizeof(SharedQueue));
     close(shm_fd);
-    sem_close(sem_full);
+    sem_close(sem_any);
     sem_close(sem_empty);
     sem_close(sem_mutex);
 
