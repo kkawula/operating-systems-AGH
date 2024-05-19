@@ -20,13 +20,6 @@ void generate_message(char *message, int size) {
 }
 
 
-typedef struct {
-    char messages[QUEUE_SIZE][MAX_MSG_SIZE];
-    int head;
-    int tail;
-    int count;
-} SharedQueue;
-
 int main() {
     int shm_fd = shm_open(SHM_NAME, O_RDWR, 0666);
     if (shm_fd == -1) {
@@ -49,6 +42,7 @@ int main() {
         exit(1);
     }
 
+
     char message[MAX_MSG_SIZE];
     generate_message(message, MAX_MSG_SIZE);
     sem_wait(sem_empty);
@@ -56,7 +50,6 @@ int main() {
 
     strcpy(queue->messages[queue->tail], message);
     queue->tail = (queue->tail + 1) % QUEUE_SIZE;
-    queue->count++;
 
     sem_post(sem_mutex);
     sem_post(sem_any);

@@ -5,3 +5,9 @@
 #define SEM_MUTEX "/sem_mutex"
 #define MAX_MSG_SIZE 11
 #define QUEUE_SIZE 256
+
+typedef struct {
+    char messages[QUEUE_SIZE][MAX_MSG_SIZE];
+    int head;
+    int tail;
+} SharedQueue;

@@ -9,14 +9,6 @@
 
 #include "config.h"
 
-
-typedef struct {
-    char messages[QUEUE_SIZE][MAX_MSG_SIZE];
-    int head;
-    int tail;
-    int count;
-} SharedQueue;
-
 int main() {
     int shm_fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
     if (shm_fd == -1) {
@@ -37,7 +29,6 @@ int main() {
 
     queue->head = 0;
     queue->tail = 0;
-    queue->count = 0;
 
     sem_t *sem_any = sem_open(SEM_ANY, O_CREAT, 0666, 0);
     sem_t *sem_empty = sem_open(SEM_EMPTY, O_CREAT, 0666, QUEUE_SIZE);
