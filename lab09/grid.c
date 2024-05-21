@@ -3,9 +3,6 @@
 #include <time.h>
 #include <ncurses.h>
 
-const int grid_width = 30;
-const int grid_height = 30;
-
 char *create_grid()
 {
     return malloc(sizeof(char) * grid_width * grid_height);
